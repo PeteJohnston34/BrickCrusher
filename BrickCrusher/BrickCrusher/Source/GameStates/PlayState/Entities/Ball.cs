@@ -17,7 +17,6 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
         //private methods
         private bool handleCollision (Fixture fixture1, Fixture fixture2, Contact contact)
         {
-            Console.WriteLine("Collision");
             return true;
         }
     }

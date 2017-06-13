@@ -11,11 +11,15 @@ namespace BrickCrusher.Source.GameStates.PlayState
         private EntityLayer _entityLayer;
         private Texture2D _background;
 
+        //properties
+        public PlayingState Parent { get; private set; }
+
         //constructors
-        public Level(EntityLayer entityLayer, Texture2D background)
+        public Level(EntityLayer entityLayer, Texture2D background, PlayingState parent)
         {
             _entityLayer = entityLayer;
             _background = background;
+            Parent = parent;
         }
 
         //public methods
@@ -27,6 +31,16 @@ namespace BrickCrusher.Source.GameStates.PlayState
         public void movePaddleRight()
         {
             _entityLayer.movePaddleRight();
+        }
+
+        public void addBall()
+        {
+            _entityLayer.addBall(16);
+        }
+
+        public void dispose()
+        {
+            _entityLayer.dispose();
         }
 
         public void update(float dt)

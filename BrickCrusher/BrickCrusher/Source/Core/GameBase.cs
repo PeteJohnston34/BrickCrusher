@@ -4,6 +4,7 @@ using BrickCrusher.Source.Input;
 using BrickCrusher.Source.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace BrickCrusher.Source.Core
 {
@@ -28,7 +29,7 @@ namespace BrickCrusher.Source.Core
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _inputHandler = new InputHandler();
             _gameStateManager = new GameStateManager();
-            _gameStateManager.pushState(new PlayState(_gameStateManager, _inputHandler));
+            _gameStateManager.pushState(new MenuState(_gameStateManager, _inputHandler));
             _gameStateManager.peekState().init();
 
             base.Initialize();
@@ -44,7 +45,6 @@ namespace BrickCrusher.Source.Core
             float dt = gameTime.ElapsedGameTime.Milliseconds / 1000.0f;
             _inputHandler.update(dt);
             _gameStateManager.update(dt);
-
             base.Update(gameTime);
         }
 

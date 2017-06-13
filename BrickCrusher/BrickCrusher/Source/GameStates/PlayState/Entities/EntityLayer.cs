@@ -19,6 +19,7 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
         private int _ballCount;
 
         //properties
+        public Level Parent { get; private set; }
         public Ball[] Balls { get { return _balls; } }
         public Paddle GetPaddle { get { return _paddle; } }
         public List<Brick> Bricks { get { return _bricks; } }
@@ -28,8 +29,8 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
         {
             _world = new World(new Vector2(0f, 0f));
             _balls = new Ball[5];
-            _ballCount = 0;
             _bricks = new List<Brick>();
+            _ballCount = 0;
         }
 
         //public methods
@@ -45,31 +46,63 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
             _paddle = EntityFactory.createPaddle(_world, Paddle.DEFAULT_PADDLE_LOCATION, segments);
         }
 
+        public void initBricks(BrickData brickData)
+        {
+            for (int i = 0; i < brickData.NumberOfBricks; i++)
+            {
+                //TODO: Implement different type of bricks
+                Vector2 currentPosition = brickData.BrickPositions[i];
+                _bricks.Add(EntityFactory.createRectangularBrick(_world, currentPosition, 64, 32, "Blue", this));
+            }
+        }
+
+        public void registerParent(Level parent)
+        {
+            Parent = parent;
+        }
+
         public void addBall(int pixelDiameter)
         {
-            if (_ballCount == 5) { return; }
-
+            if(_ballCount == _balls.Length) { return; }
             Vector2 position;
 
             if (_paddle == null) { position = new Vector2(100, 100); }
             else { position = new Vector2(_paddle.PixelPosition.X, _paddle.PixelPosition.Y - (pixelDiameter / 2) - (Paddle.PADDLE_HEIGHT / 2)); }
-          
+
             _balls[_ballCount] = EntityFactory.createBall(_world, position, pixelDiameter);
             _ballCount++;
         }
 
         public void movePaddleLeft()
         {
-            Console.WriteLine("Left");
             if (_paddle.GetBody.LinearVelocity.X > 0) { _paddle.GetBody.LinearVelocity = new Vector2(_paddle.GetBody.LinearVelocity.X * .95f, 0); }
             _paddle.GetBody.ApplyForce(new Vector2(-30, 0), _paddle.GetBody.WorldCenter);
         }
 
         public void movePaddleRight()
         {
-            Console.WriteLine("Right");
             if (_paddle.GetBody.LinearVelocity.X < 0) { _paddle.GetBody.LinearVelocity = new Vector2(_paddle.GetBody.LinearVelocity.X * .95f, 0); }
             _paddle.GetBody.ApplyForce(new Vector2(30, 0), _paddle.GetBody.WorldCenter);
+        }
+
+        public void handleBrickDestory(Brick brick)
+        {
+            _bricks.Remove(brick);
+            brick.dispose();
+            if (_bricks.Count == 0) { Parent.Parent.endStateVictory(); }
+            //increment score
+            //animation
+        }
+
+        public void dispose()
+        {
+            for (int i = 0; i < _ballCount; i++)
+            {
+                _balls[i].dispose();
+            }
+            _bricks.ForEach(e => e.dispose());
+            _paddle.dispose();
+            _border.dispose();
         }
 
         public void update(float dt)
@@ -78,14 +111,17 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
 
             _world.Step(dt);
             _paddle.update(dt);
-
-            for (int i = 0; i < _ballCount; i++)
+            for(int i = 0; i < _ballCount; i++)
             {
                 _balls[i].update(dt);
                 if (_balls[i].PixelPosition.Y > SCREEN_HEIGHT)
                 {
                     _balls[i].dispose();
-                    _balls[i] = null;
+                    if(i < _ballCount - 1)
+                    {
+                        _balls[i] = _balls[_ballCount - 1];
+                        _balls[_ballCount - 1] = null;
+                    }
                     _ballCount--;
                 }
             }

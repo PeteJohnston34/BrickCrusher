@@ -1,10 +1,11 @@
 ﻿using BrickCrusher.Source.Input;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using static BrickCrusher.Source.GameStates.MenuState;
 
 namespace BrickCrusher.Source.GameStates.PlayState
 {
-    public class PlayState : IGameState
+    public class PlayingState : IGameState
     {
         //members
         private GameStateManager _gameStateManager;
@@ -12,7 +13,7 @@ namespace BrickCrusher.Source.GameStates.PlayState
         private InputHandler _inputHandler;
 
         //constructors
-        public PlayState(GameStateManager gameStateManager, InputHandler inputHandler)
+        public PlayingState(GameStateManager gameStateManager, InputHandler inputHandler)
         {
             _gameStateManager = gameStateManager;
             _inputHandler = inputHandler;
@@ -23,12 +24,23 @@ namespace BrickCrusher.Source.GameStates.PlayState
         public void init()
         {
             //Test
-            _currentLevel = LevelFactory.testLevel();
+            _currentLevel = LevelFactory.testLevel(this);
+        }
+
+        public void endStateVictory()
+        {
+            dispose();
+            _gameStateManager.popState();
+            if(_gameStateManager.peekState() is MenuState)
+            {
+                MenuState menuState = (MenuState)_gameStateManager.peekState();
+                menuState.CurrentScreen = Screen.Victory;
+            }
         }
 
         public void dispose()
         {
-
+            _currentLevel.dispose();
         }
 
         public void update(float dt)
@@ -55,13 +67,10 @@ namespace BrickCrusher.Source.GameStates.PlayState
                 _currentLevel.movePaddleRight();
             }
 
-            //if (_inputHandler.isKeyReleasedThisFrame(Keys.A) && !_inputHandler.isKeyPressed(Keys.D) ||
-            //    _inputHandler.isKeyReleasedThisFrame(Keys.D) && !_inputHandler.isKeyPressed(Keys.A) ||
-            //    _inputHandler.isKeyReleasedThisFrame(Keys.Left) && !_inputHandler.isKeyPressed(Keys.Right) ||
-            //    _inputHandler.isKeyReleasedThisFrame(Keys.Right) && !_inputHandler.isKeyPressed(Keys.Left))
-            //{
-            //    _currentLevel.stopPaddle();
-            //}
+            if (_inputHandler.isKeyPressedThisFrame(Keys.Space))
+            {
+                _currentLevel.addBall();
+            }
         }
     }
 }

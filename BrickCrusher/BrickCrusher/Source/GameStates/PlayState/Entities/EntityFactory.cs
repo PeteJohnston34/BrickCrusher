@@ -23,6 +23,18 @@ namespace BrickCrusher.Source.GameStates.PlayState.Entities
             return ball;
         }
 
+        public static Brick createRectangularBrick(World world, Vector2 pixelLocation, int pixelWidth, int pixelHeight, string color, EntityLayer entityLayer)
+        {
+            Body body = new Body(world, new Vector2(pixelLocation.X / PPM, pixelLocation.Y / PPM));
+            body.BodyType = BodyType.Static;
+            FixtureFactory.AttachRectangle(pixelWidth / PPM, pixelHeight / PPM, DEFAULT_DENSITY, Vector2.Zero, body);
+            body.FixtureList[0].Restitution = 0f;
+            body.FixtureList[0].Friction = 0f;
+            Brick brick = new Brick(pixelWidth, pixelHeight, ContentLoader.getImage(color + "Block" + pixelWidth), body);
+            brick.registerEventHandler(entityLayer.handleBrickDestory);
+            return brick;
+        }
+
         public static Paddle createPaddle(World world, Vector2 pixelLocation, int segments)
         {
             Texture2D[] paddleSprites = new Texture2D[3];
